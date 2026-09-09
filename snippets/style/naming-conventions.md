@@ -5,4 +5,5 @@
 - Booleans read as assertions: `isReady`, `hasAccess`, `shouldRetry`. Never negated in the name — `isDisabled` over `isNotEnabled`.
 - Functions that do something are verb phrases; functions that return something are noun phrases or `getX`. Do not mix both roles in one function.
 - The length of a name scales with the size of its scope. A loop index may be `i`; a module-level export may not.
+- Name files for their role in the layer they sit in: `client.handler.ts`, `clients.controller.ts`, `client.repository.ts`, `client.validation.ts`. A test file takes the name of the unit under test plus the suffix the project uses.
 - Match the surrounding file's existing vocabulary. If the codebase says `account`, do not introduce `user` for the same concept.

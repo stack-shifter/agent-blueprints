@@ -112,11 +112,25 @@ silently and you stop trusting either.
 Atomic rule blocks. One idea per file, no preamble, starting at `##` so a paste lands at
 the right heading depth.
 
-- `style/` — vertical code layout, naming, comment density
-- `typing/` — strict TypeScript, Python type hints
-- `testing/` — test discipline, mocking
-- `git/` — commit message format, branch discipline
-- `safety/` — ask before destructive actions, secrets
+| Snippet | Rule |
+|---|---|
+| [`style/prefer-boring-code`](snippets/style/prefer-boring-code.md) | Choose the implementation a mid-level developer reads once; abstract on the third occurrence, not the second |
+| [`style/vertical-code-layout`](snippets/style/vertical-code-layout.md) | Reads top to bottom: one statement per line, guard clauses first, declare near first use |
+| [`style/naming-conventions`](snippets/style/naming-conventions.md) | Names state what, not how; booleans as assertions; files named for their role in the layer |
+| [`style/comment-density`](snippets/style/comment-density.md) | Comment why not what; match the peer group, and cover it uniformly |
+| [`typing/strict-typescript`](snippets/typing/strict-typescript.md) | No `any`, no `as` to silence, no `!`; named domain types over catch-all maps |
+| [`typing/python-type-hints`](snippets/typing/python-type-hints.md) | Every signature annotated; no bare `Any`; `X \| None` over `Optional` |
+| [`testing/test-discipline`](snippets/testing/test-discipline.md) | Every behavior change ships with a test; one behavior each; never weaken an assertion for green |
+| [`testing/verify-before-done`](snippets/testing/verify-before-done.md) | Run typecheck, lint, test, build before reporting done — scaled to the work |
+| [`testing/no-mock-overuse`](snippets/testing/no-mock-overuse.md) | Mock only what you do not own; never mock internals |
+| [`git/commit-message-format`](snippets/git/commit-message-format.md) | `type(scope): summary`, imperative, one logical change |
+| [`git/branch-discipline`](snippets/git/branch-discipline.md) | Branch first; commit only when asked; never discard work you did not create |
+| [`safety/ask-before-destructive`](snippets/safety/ask-before-destructive.md) | The explicit list of actions requiring a yes first |
+| [`safety/no-secret-exfiltration`](snippets/safety/no-secret-exfiltration.md) | Never print, paste, or commit a secret value |
+
+Improving a snippet propagates nowhere on its own. When you sharpen one, re-paste it into
+the baselines already carrying the older phrasing — `grep -rl` a distinctive line from the
+snippet across `stacks/` to find them.
 
 ## Adding to the vault
 

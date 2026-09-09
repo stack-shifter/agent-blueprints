@@ -8,4 +8,5 @@
 - No `@ts-ignore`. `@ts-expect-error` is permitted only with a comment naming the upstream issue it works around.
 - Type the boundaries, infer the interior. Annotate exported signatures explicitly; let inference handle local variables.
 - Prefer discriminated unions over optional-field soup. Make illegal states unrepresentable rather than checking for them.
+- Prefer named domain types over catch-all maps. Reserve `Record<string, unknown>` for genuinely untyped external payloads — never for config objects, query-expression maps, or any structure whose keys you know or can partially enumerate.
 - Validate all external input (network, filesystem, env, user) at the boundary with a schema, and type the interior from the schema's output.
