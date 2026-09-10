@@ -86,14 +86,19 @@ twice — markdown for Claude Code, TOML for Codex — and **the two must say th
 
 | Role | Use it when | Claude | Codex |
 |---|---|---|---|
+| `authorization-boundary-auditor` | Auth, tenant ownership, object access, signed resources, or IAM grants changed | [md](sub-agents/claude/authorization-boundary-auditor.md) | [toml](sub-agents/codex/authorization-boundary-auditor.toml) |
+| `contract-drift-auditor` | An API operation changed across providers, consumers, schemas, fixtures, or docs | [md](sub-agents/claude/contract-drift-auditor.md) | [toml](sub-agents/codex/contract-drift-auditor.toml) |
 | `frontend-drift-auditor` | A change touched a shared shell, layout or token, and several screens must still agree | [md](sub-agents/claude/frontend-drift-auditor.md) | [toml](sub-agents/codex/frontend-drift-auditor.toml) |
+| `infrastructure-change-reviewer` | CDK, CloudFormation, container, networking, IAM, or deployment behavior changed | [md](sub-agents/claude/infrastructure-change-reviewer.md) | [toml](sub-agents/codex/infrastructure-change-reviewer.toml) |
+| `migration-safety-reviewer` | A schema, ORM, backfill, datastore, or API-version migration is ready for review | [md](sub-agents/claude/migration-safety-reviewer.md) | [toml](sub-agents/codex/migration-safety-reviewer.toml) |
+| `spec-implementation-reconciler` | One approved product decision spans plans, prototypes, contracts, database docs, and code status | [md](sub-agents/claude/spec-implementation-reconciler.md) | [toml](sub-agents/codex/spec-implementation-reconciler.toml) |
 | `validation-review` | A phase claims to be done and you want it verified from a cold start | [md](sub-agents/claude/validation-review.md) | [toml](sub-agents/codex/validation-review.toml) |
 
 `sub-agents/claude/*.md` copies into a project's `.claude/agents/`.
 `sub-agents/codex/*.toml` copies into its `.codex/agents/`. Each works as-is where its
 directory says it goes — no stripping, no conversion.
 
-Both current personas are read-only: no `Write`/`Edit` in their Claude `tools`, and
+All current personas are read-only: no `Write`/`Edit` in their Claude `tools`, and
 `sandbox_mode = "read-only"` in their Codex twins. A persona that must mutate files carries
 `Write`/`Edit` and pairs it with `workspace-write`.
 
