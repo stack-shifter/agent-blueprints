@@ -3,7 +3,7 @@ name: role-name
 description: What this agent does, in the third person, plus when to invoke it. This is the routing signal — most of the file's value is here.
 tools: Read, Grep, Glob, Bash
 model: inherit
-platform: shared
+platform: claude
 ---
 
 # Role Name
@@ -38,11 +38,11 @@ FRONTMATTER
   tools        Least privilege. Omit the key entirely to inherit everything.
                Grant Write/Edit only to agents that must mutate files.
   model        inherit | sonnet | opus | haiku
-  platform     shared | claude | codex — must match the directory this file
-               lives in. A mismatch is how you spot a misfiled copy.
+  platform     claude — must match the directory this file lives in. A mismatch
+               is how you spot a misfiled copy.
 
-  Codex has no use for this frontmatter; it is safe to strip when pasting there.
-  That is what lets one shared/ file serve both platforms.
+  This frontmatter is real Claude Code configuration. Codex does not read it, and
+  does not read markdown at all — it loads TOML. See codex-agent.template.toml.
 
 SECTIONS
   Five sections, in the order above, always. Fixed order is what lets you diff
@@ -60,9 +60,13 @@ SECTIONS
   spend money.
 
 PLACEMENT
-  Default to sub-agents/shared/. Put a file in claude/ or codex/ only if it is
-  absent from shared/, or is a deliberate override — and an override must open
-  with a line saying what it changes and why shared/ was insufficient.
+  This file goes in sub-agents/claude/. Every role also gets a TOML twin in
+  sub-agents/codex/, built from templates/codex-agent.template.toml, and the two
+  must say the same thing — change one, change the other in the same commit.
+
+  Keep tools and the twin's sandbox_mode in agreement: grant Write/Edit only to a
+  persona that must mutate files, and pair that with workspace-write. Auditors and
+  reviewers get neither.
 
 SELF-CONTAINMENT
   This file gets copied out of the vault on its own. It must make sense with

@@ -4,8 +4,8 @@
 
 This is a manual-copy vault for agent instructions, with no runtime application.
 
-- `stacks/<stack>/agent.md` contains standalone project baselines. Sibling readmes explain stack selection.
-- `sub-agents/shared/` holds platform-neutral personas; `sub-agents/claude/` and `sub-agents/codex/` contain platform-specific roles or explicit overrides.
+- `stacks/<stack>/AGENT.md` contains standalone project baselines. Sibling readmes explain stack selection.
+- `sub-agents/claude/*.md` and `sub-agents/codex/*.toml` hold the same roles in each platform's own format; a role's two files must say the same thing.
 - `snippets/<topic>/` stores canonical, atomic rule blocks grouped by concerns such as `git`, `testing`, and `safety`.
 - `templates/` defines the required shape for each artifact type.
 
@@ -17,23 +17,29 @@ There is no package manager, build step, or automated suite. Validate Markdown w
 
 ```bash
 git diff --check
-rg "TODO|AUTHORING NOTES" stacks sub-agents snippets
+rg "AUTHORING NOTES|<Stack Name>|role-name|Rule Title" stacks sub-agents snippets
 git diff -- README.md stacks/ sub-agents/ snippets/ templates/
 ```
 
-The first command catches whitespace errors. The scan finds unfinished stubs or template notes; known stack stubs may intentionally retain `TODO` markers. Review the diff to confirm indexes and canonical copies agree.
+The first command catches whitespace errors. The scan finds template notes or placeholders
+that escaped into an artifact. Review the diff to confirm indexes and canonical copies
+agree.
 
 ## Writing Style & Naming Conventions
 
-Use concise Markdown, imperative rules, and short sections. Wrap prose near the existing 80-character style when practical. Use kebab-case filenames such as `security-auditor.md` and stack directories such as `python-fastapi/`.
+Use concise Markdown, imperative rules, and short sections. Wrap prose near the existing 80-character style when practical. Use kebab-case filenames such as `validation-review.md` and stack directories such as `python-fastapi/`.
 
-Start snippets at `##`, keep one idea per file, and do not add a preamble. Sub-agent files follow the frontmatter and five-section order in `templates/sub-agent.template.md`; `name` must match the filename and `platform` must match its directory. Delete all authoring-note comments when instantiating templates.
+Start snippets at `##`, keep one idea per file, and do not add a preamble. Claude sub-agents
+follow the frontmatter and five-section order in `templates/sub-agent.template.md`; Codex
+sub-agents follow `templates/codex-agent.template.toml` and use the same five-section body.
+Names match filenames in each platform's required case, and Claude's `platform` matches its
+directory. Delete all authoring-note comments when instantiating templates.
 
 Most importantly, copied artifacts must be self-contained: never link to sibling repository files or depend on another fragment being pasted with them. Paste canonical snippet wording into applicable stack baselines rather than paraphrasing it.
 
 ## Testing Guidelines
 
-Test by copying the changed artifact into an empty directory and reading it without repository context. Confirm instructions are complete, paths are destination-safe, frontmatter is valid, and shared wording matches its source snippet. Platform overrides must state what differs and why the shared persona is insufficient.
+Test by copying the changed artifact into an empty directory and reading it without repository context. Confirm instructions are complete, paths are destination-safe, frontmatter is valid, and shared wording matches its source snippet. A role's Claude and Codex files must state the same rules; any difference between them must be a format necessity, never a behavior change.
 
 ## Commits & Pull Requests
 

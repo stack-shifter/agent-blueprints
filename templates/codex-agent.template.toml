@@ -1,0 +1,66 @@
+name = "role_name"
+description = "What this agent does, in the third person, plus when to invoke it. This is the routing signal — most of the file's value is here."
+model = "gpt-5.6-sol"
+model_reasoning_effort = "medium"
+sandbox_mode = "read-only"
+
+developer_instructions = """
+Mission:
+
+One or two sentences: what this agent is for, and what "done" means.
+
+Rules:
+
+- Hard constraints, imperative voice, one per line.
+- Include the negative rules — what it must NOT do is usually the load-bearing half.
+- Prefer rules that are checkable over rules that are aspirational.
+
+Process:
+
+1. Ordered steps, and only when order actually matters.
+2. Keep to five or fewer.
+
+Output:
+
+1. Exactly what this agent returns: format, ordering, severity labels, what it omits.
+2. Specific enough that two runs on the same input are comparable.
+3. For a reviewer or auditor, end with a single explicit verdict token and state the
+   criteria for each one.
+
+Boundaries:
+
+When to stop and hand back rather than proceeding. What is explicitly out of scope.
+"""
+
+# ─────────────────────────────────────────────────────────────────────────────
+# AUTHORING NOTES — delete this block when you fill the template in.
+#
+# THIS FILE GETS COPIED INTO `.codex/agents/` AND LOADED AS-IS.
+#   It must stand alone. No references to this vault, no assumption that another
+#   file was pasted with it.
+#
+# KEYS
+#   name                    snake_case, and it must be the snake_case form of the
+#                           filename. `validation-review.toml` declares
+#                           `name = "validation_review"`. A mismatch is how you
+#                           spot a misfiled copy.
+#   description             Third person, states WHEN to invoke. Written for a
+#                           dispatcher choosing between agents.
+#   model                   The one environment-specific line. Check it against
+#                           what the destination has before relying on a copy.
+#   model_reasoning_effort  low | medium | high
+#   sandbox_mode            read-only for anything that audits, reviews, or
+#                           proposes rather than applies. Omit only when the
+#                           agent must genuinely write.
+#   developer_instructions  The whole prompt, in a triple-quoted string.
+#
+# PLATFORM SPLIT
+#   Codex loads TOML; Claude loads markdown with YAML frontmatter. A persona
+#   needed paste-ready on both platforms lives twice — here in TOML and in
+#   `sub-agents/claude/` in markdown — and the two must say the same thing.
+#   See `templates/sub-agent.template.md` for the markdown shape.
+#
+# LENGTH
+#   Keep `developer_instructions` tight. Longer than roughly sixty lines means it
+#   wants to be a stack baseline or a set of snippets instead.
+# ─────────────────────────────────────────────────────────────────────────────

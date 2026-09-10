@@ -1,6 +1,6 @@
 ## Test discipline
 
-Every behavior change ships with a test that covers it. Tests live beside the code they cover and are named for the unit under test.
+Every behavior change ships with a test that covers it. Tests follow the project's established layout and are named for the unit under test.
 
 - One behavior per test. The test name states the behavior in a sentence: `returns empty list when no matches`, not `search 2`.
 - Write tests before or after the implementation, whichever suits the work. Ordering is not the point; covering the changed behavior before reporting done is.
