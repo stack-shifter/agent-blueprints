@@ -4,7 +4,7 @@ Rules for working in a React single-page application built with Vite and TypeScr
 using Cognito hosted-UI auth, Bootstrap, and React Hook Form with Zod. They apply to
 every file unless a more specific instruction in the task overrides them.
 
-**Assumed majors:** React 19, React Router 8, Vite 7, TypeScript 5. Only a few rules below
+**Assumed majors:** React 19, React Router 8, Vite 8, TypeScript 5. Only a few rules below
 depend on a major, and each says so where it does. If the project is on a different major,
 the project wins — change this file rather than follow a rule that no longer applies.
 
