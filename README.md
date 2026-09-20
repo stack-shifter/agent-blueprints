@@ -92,15 +92,18 @@ twice — markdown for Claude Code, TOML for Codex — and **the two must say th
 | `infrastructure-change-reviewer` | CDK, CloudFormation, container, networking, IAM, or deployment behavior changed | [md](sub-agents/claude/infrastructure-change-reviewer.md) | [toml](sub-agents/codex/infrastructure-change-reviewer.toml) |
 | `migration-safety-reviewer` | A schema, ORM, backfill, datastore, or API-version migration is ready for review | [md](sub-agents/claude/migration-safety-reviewer.md) | [toml](sub-agents/codex/migration-safety-reviewer.toml) |
 | `spec-implementation-reconciler` | One approved product decision spans plans, prototypes, contracts, database docs, and code status | [md](sub-agents/claude/spec-implementation-reconciler.md) | [toml](sub-agents/codex/spec-implementation-reconciler.toml) |
+| `spec-plan-reviewer` | An implementation must be validated against its delivery spec and phased plan before completion | [md](sub-agents/claude/spec-plan-reviewer.md) | [toml](sub-agents/codex/spec-plan-reviewer.toml) |
 | `validation-review` | A phase claims to be done and you want it verified from a cold start | [md](sub-agents/claude/validation-review.md) | [toml](sub-agents/codex/validation-review.toml) |
 
 `sub-agents/claude/*.md` copies into a project's `.claude/agents/`.
 `sub-agents/codex/*.toml` copies into its `.codex/agents/`. Each works as-is where its
 directory says it goes — no stripping, no conversion.
 
-All current personas are read-only: no `Write`/`Edit` in their Claude `tools`, and
-`sandbox_mode = "read-only"` in their Codex twins. A persona that must mutate files carries
-`Write`/`Edit` and pairs it with `workspace-write`.
+Review personas omit `Write`/`Edit` from their Claude `tools` and normally use
+`sandbox_mode = "read-only"` in their Codex twins. `spec-plan-reviewer` is the narrow
+exception: its Codex twin uses `workspace-write` so approved validation tools can create
+temporary output, but its rules prohibit tracked changes and require cleanup. A persona
+that must mutate tracked files carries `Write`/`Edit` and pairs it with `workspace-write`.
 
 Shapes live in [`templates/sub-agent.template.md`](templates/sub-agent.template.md) and
 [`templates/codex-agent.template.toml`](templates/codex-agent.template.toml).
