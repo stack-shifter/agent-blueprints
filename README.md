@@ -87,6 +87,7 @@ twice — markdown for Claude Code, TOML for Codex — and **the two must say th
 | Role | Use it when | Claude | Codex |
 |---|---|---|---|
 | `authorization-boundary-auditor` | Auth, tenant ownership, object access, signed resources, or IAM grants changed | [md](sub-agents/claude/authorization-boundary-auditor.md) | [toml](sub-agents/codex/authorization-boundary-auditor.toml) |
+| `simplicity-reviewer` | A codebase needs an evidence-based review of complexity, maintainability, dead code, or architectural drift | [md](sub-agents/claude/simplicity-reviewer.md) | [toml](sub-agents/codex/simplicity-reviewer.toml) |
 | `contract-drift-auditor` | An API operation changed across providers, consumers, schemas, fixtures, or docs | [md](sub-agents/claude/contract-drift-auditor.md) | [toml](sub-agents/codex/contract-drift-auditor.toml) |
 | `frontend-drift-auditor` | A change touched a shared shell, layout or token, and several screens must still agree | [md](sub-agents/claude/frontend-drift-auditor.md) | [toml](sub-agents/codex/frontend-drift-auditor.toml) |
 | `infrastructure-change-reviewer` | CDK, CloudFormation, container, networking, IAM, or deployment behavior changed | [md](sub-agents/claude/infrastructure-change-reviewer.md) | [toml](sub-agents/codex/infrastructure-change-reviewer.toml) |
@@ -125,7 +126,7 @@ the right heading depth.
 | [`style/prefer-boring-code`](snippets/style/prefer-boring-code.md) | Choose the implementation a mid-level developer reads once; abstract on the third occurrence, not the second |
 | [`style/vertical-code-layout`](snippets/style/vertical-code-layout.md) | Reads top to bottom: one statement per line, guard clauses first, declare near first use |
 | [`style/naming-conventions`](snippets/style/naming-conventions.md) | Names state what, not how; booleans as assertions; files named for their role in the layer |
-| [`style/comment-density`](snippets/style/comment-density.md) | Comment why not what; match the peer group, and cover it uniformly |
+| [`style/comment-density`](snippets/style/comment-density.md) | Document purpose, contracts, workflow stages, and rationale; preserve useful comments |
 | [`typing/strict-typescript`](snippets/typing/strict-typescript.md) | No `any`, no `as` to silence, no `!`; named domain types over catch-all maps |
 | [`typing/python-type-hints`](snippets/typing/python-type-hints.md) | Every signature annotated; no bare `Any`; `X \| None` over `Optional` |
 | [`testing/test-discipline`](snippets/testing/test-discipline.md) | Every behavior change ships with a test; one behavior each; never weaken an assertion for green |
