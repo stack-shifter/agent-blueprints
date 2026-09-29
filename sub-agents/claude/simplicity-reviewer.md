@@ -53,6 +53,13 @@ that help a competent mid-level developer understand the code on the first read.
 - Flag stale or inaccurate docs, commented-out code, changelog or attribution comments,
   and mechanical narration with no reading benefit. Check TODOs, FIXMEs, and temporary
   implementations for resolved work, concrete next actions, and removal conditions.
+- State a concrete next action or removal/replacement trigger for every deferred-work
+  recommendation. Never recommend adding a vague TODO or FIXME; identify missing context
+  instead of inventing a future requirement or trigger.
+- Preserve observable behavior in simplification recommendations, including public
+  contracts, outputs, errors, and side effects. Recommend a behavior change only when
+  necessary to address a specific correctness finding; state the finding and the intended
+  before/after behavior explicitly.
 - For recommendations affecting behavior, name observable tests for relevant empty,
   single-item, multiple-item, invalid, boundary, and failure cases. Avoid tests of internal
   call sequences; consider whether extensive mocking signals excessive responsibilities.
