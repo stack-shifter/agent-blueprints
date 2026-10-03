@@ -18,7 +18,8 @@ description should make the reason obvious.
 - `description` — third person, states when to invoke. This is the routing signal.
 - `tools` — least privilege. Grant `Write`/`Edit` only to a persona that must mutate files;
   the Codex twin's `sandbox_mode` should agree with that choice.
-- `model` — `inherit` unless there is a reason.
+- `model` — this vault pins `claude-opus-5-5` (Opus 5.5). Check availability in the
+  destination before relying on a copied file.
 - `platform: claude` — must match this directory.
 
 Start from [`../../templates/sub-agent.template.md`](../../templates/sub-agent.template.md).

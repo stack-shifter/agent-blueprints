@@ -106,6 +106,31 @@ exception: its Codex twin uses `workspace-write` so approved validation tools ca
 temporary output, but its rules prohibit tracked changes and require cleanup. A persona
 that must mutate tracked files carries `Write`/`Edit` and pairs it with `workspace-write`.
 
+### Invoking independent reviewers
+
+Invoke review and audit roles from a fresh context: use
+`fork_turns="none"` when the Codex spawning API supports it, and a self-contained brief
+without prior conversation on either platform. Name the implementation scope, canonical
+requirements, constraints, and relevant references. Include spec and plan paths for
+`spec-plan-reviewer`; simplicity review defaults to the codebase if scope is omitted.
+Provide policy and enforcement references for authorization review, canonical contract
+surfaces for drift review, source and target states plus recovery gates for migration
+review, and revision, environment, generation command, and freshness for supplied
+infrastructure plans or diffs. Include the decision and artifact authority order for
+reconciliation, and acceptance criteria for validation review. These roles inspect
+supplied evidence within their existing permissions; a fresh context grants no additional
+access or authority to run live checks.
+
+State approved constraints neutrally. Label supplied test results and rationale as claims
+to verify; avoid reassuring conclusions that the implementation is already correct.
+
+On reruns, supply prior review reports and reported fixes as attributed history. Keep
+initial findings, fixes, independently verified resolution status, and the final verdict
+separate in the delivery summary, including findings from other reviewers. A clean rerun
+must not erase a defect found earlier. Report unavailable verification as a coverage gap,
+with the affected conclusion and evidence needed to close it. Judge review quality by
+demonstrated scrutiny, not finding counts.
+
 Shapes live in [`templates/sub-agent.template.md`](templates/sub-agent.template.md) and
 [`templates/codex-agent.template.toml`](templates/codex-agent.template.toml).
 

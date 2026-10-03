@@ -20,8 +20,9 @@ The whole prompt: mission, rules, process, output contract, boundaries.
 `name` must be the snake_case form of the filename — `validation-review.toml` declares
 `name = "validation_review"`. A mismatch is how you spot a misfiled copy.
 
-`model` is the one line that is environment-specific. Check it against what the destination
-actually has available before relying on a copied file; everything else transfers unchanged.
+`model` is the one line that is environment-specific. This vault pins `gpt-6.1-sol`.
+Check it against what the destination actually has available before relying on a copied
+file; everything else transfers unchanged.
 
 Start from `../../templates/codex-agent.template.toml`.
 
