@@ -34,13 +34,16 @@ It also **declines** two rules that app's own guidelines state, because the code
 and the doc is wrong: inputs stay uncontrolled via `register()`, and co-located global
 stylesheets with BEM namespacing are kept instead of CSS Modules.
 
-The reference application is on React Router 7. This baseline deliberately targets version
-8 so a new copy uses the current module boundaries and no removed compatibility package.
+Installed router interfaces determine imports, middleware, and lazy-loading APIs.
+Preserve established architecture rather than migrating it to match an example.
+WCAG conformance applies only when the project specifies a version and level.
 
 ## Snippet subset
 
-Carries thirteen of the fourteen snippets. It omits `typing/python-type-hints` because this
-is a TypeScript stack.
+Carries the same sixteen snippets as lite, with shared wording pasted in full.
+Uses conditional accessibility and scoped authorization, plus test isolation,
+deferred work, and spec/plan scope. Omits Python typing. Full remains a standalone
+superset of lite's guidance; the house libraries add stack-specific requirements.
 
 ## Status
 

@@ -9,12 +9,12 @@ styling, forms, and data fetching — or joining a project that already made the
 
 ## Assumes
 
-- React 19, Vite, TypeScript strict, npm. The baseline names its assumed majors in
-  one place and says the project wins on a mismatch.
-- React Router 8 data router (`createBrowserRouter` and `RouterProvider` from
-  `react-router/dom`; everything else from `react-router`).
-- The repository chooses its test runner, component-testing library, and test layout.
-- Nothing about how you authenticate, style, validate, or fetch.
+- React, Vite, TypeScript strict, npm, and React Router. Installed configuration
+  and types determine supported versions and router interfaces.
+- Preserve existing feature- or purpose-based organization, routing, and providers.
+- The repository chooses authentication, styling, forms, fetching, and its test tools.
+- Automated tests use isolated configuration and controlled external boundaries.
+- WCAG conformance applies only when the project specifies a version and level.
 
 ## Pick the sibling instead when
 
@@ -24,13 +24,13 @@ Form with Zod. That is [`react-vite-spa-full`](../react-vite-spa-full/).
 The two are **peers, not layers**. `full` is a standalone superset that repeats this
 file's text; it is not an overlay to paste on top of this one.
 
-The reference application is on React Router 7. This baseline deliberately targets version
-8 so a new copy uses the current module boundaries and no removed compatibility package.
-
 ## Snippet subset
 
-Carries thirteen of the fourteen snippets. It omits `typing/python-type-hints` because this
-is a TypeScript stack.
+Carries sixteen snippets, including test isolation, deferred work, and spec/plan
+scope. Uses `accessibility/project-requirements` and `safety/scoped-authorization`
+in place of unconditional WCAG conformance and repeated approval for ordinary edits.
+Omits Python typing because this is a TypeScript stack. Shared wording is pasted
+in full; the baseline has no dependency on these vault paths.
 
 ## Status
 

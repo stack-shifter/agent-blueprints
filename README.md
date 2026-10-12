@@ -61,7 +61,7 @@ paste that snippet into its agent file. Always paste the text — never a path.
 |---|---|---|
 | [`aspnetcore-rest-api`](stacks/aspnetcore-rest-api/) | A containerized ASP.NET Core REST API in C# — attribute-routed controllers, EF Core repositories, Postgres | **Complete** |
 | [`aws-cdk-library`](stacks/aws-cdk-library/) | Working **on** a shared AWS CDK construct library that other repos build stacks with | **Complete** |
-| [`aws-cdk-serverless-api`](stacks/aws-cdk-serverless-api/) | Building a production serverless API — API Gateway and Lambda, over DynamoDB or SQL — **with** that library | **Complete** |
+| [`aws-cdk-serverless-api`](stacks/aws-cdk-serverless-api/) | Building a production serverless API — API Gateway and Lambda, over DynamoDB or SQL — using existing constructs | **Complete** |
 | [`expressjs-rest-api`](stacks/expressjs-rest-api/) | A containerized Express 5 REST API — versioned routers, thin controllers, Zod validation, Drizzle repositories | **Complete** |
 | [`react-vite-spa-lite`](stacks/react-vite-spa-lite/) | A React SPA where auth, styling, forms and data fetching are the project's own call | **Complete** |
 | [`react-vite-spa-full`](stacks/react-vite-spa-full/) | A React SPA on the house set — Cognito hosted UI, Bootstrap 5, React Hook Form + Zod | **Complete** |
@@ -147,6 +147,7 @@ the right heading depth.
 
 | Snippet | Rule |
 |---|---|
+| [`accessibility/project-requirements`](snippets/accessibility/project-requirements.md) | Semantic and keyboard basics; WCAG conformance only when specified |
 | [`accessibility/wcag-aa-baseline`](snippets/accessibility/wcag-aa-baseline.md) | WCAG 2.2 AA: semantic elements, keyboard operability, accessible names, dialog semantics, live regions |
 | [`style/prefer-boring-code`](snippets/style/prefer-boring-code.md) | Choose the implementation a mid-level developer reads once; abstract on the third occurrence, not the second |
 | [`style/vertical-code-layout`](snippets/style/vertical-code-layout.md) | Reads top to bottom: one statement per line, guard clauses first, declare near first use |
@@ -161,6 +162,10 @@ the right heading depth.
 | [`git/branch-discipline`](snippets/git/branch-discipline.md) | Branch first; commit only when asked; never discard work you did not create |
 | [`safety/ask-before-destructive`](snippets/safety/ask-before-destructive.md) | The explicit list of actions requiring a yes first |
 | [`safety/no-secret-exfiltration`](snippets/safety/no-secret-exfiltration.md) | Never print, paste, or commit a secret value |
+| [`safety/scoped-authorization`](snippets/safety/scoped-authorization.md) | Honor approved scope; distinguish editing from live execution |
+| [`testing/test-isolation`](snippets/testing/test-isolation.md) | Deterministic configuration, blocked outbound calls, and explicit log expectations |
+| [`style/deferred-work`](snippets/style/deferred-work.md) | Triage TODO/FIXME and track replacement or removal triggers |
+| [`planning/spec-and-plan-scope`](snippets/planning/spec-and-plan-scope.md) | Documentation requests and approved implementation phase ranges |
 
 Improving a snippet propagates nowhere on its own. When you sharpen one, re-paste it into
 the baselines already carrying the older phrasing — `grep -rl` a distinctive line from the
