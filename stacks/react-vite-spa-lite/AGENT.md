@@ -7,15 +7,14 @@ This baseline assumes React, Vite, TypeScript, and React Router, and nothing els
 Authentication, styling, forms, and data fetching are project decisions — follow whatever
 the repository already does.
 
-**Assumed majors:** React 19, React Router 8, Vite 7, TypeScript 5. Only a few rules below
-depend on a major, and each says so where it does. If the project is on a different major,
-the project wins — change this file rather than follow a rule that no longer applies.
+Read manifests, lockfiles, compiler configuration, and installed types for
+supported versions and interfaces. Never infer them from another project.
 
 ## Project shape
 
-A single-page application. Source lives under `src/`, grouped by purpose rather than by
-feature: pages, reusable pieces of interface, hooks, contexts, models, and utilities each
-get a directory. The entry point mounts the app and installs whatever providers wrap it.
+Source lives under `src/`. Preserve the established organization, whether by
+feature or purpose. Do not add folders, providers, or dependency layers solely for
+uniformity. The entry point mounts the app and installs its existing providers.
 
 Static assets live in the public directory. Build output is generated and never edited by
 hand. Read the tree before assuming a layout beyond this.
@@ -47,23 +46,23 @@ that applies; never infer that one command includes another.
 
 ## Routing
 
-Use the data router.
+Preserve the existing routing and data-fetching architecture. Verify imports,
+middleware, lazy-loading APIs, and route-data fields against installed router types.
 
-- Import `createBrowserRouter` and `RouterProvider` from `react-router/dom`. Everything
-  else — `Link`, `NavLink`, `Outlet`, `Navigate`, `useNavigate`, `useParams`,
-  `useLoaderData`, `useRouteError` — comes from `react-router`. **React Router 8 requires
-  this split.** Version 7 supported `react-router/dom` while retaining compatibility
-  exports; check which major the project has before moving an import.
-- **The `react-router-dom` package no longer exists.** Never install it and never import
-  from it.
-- Middleware is the default and the future flags that once gated it have been removed.
-  Do not add them back.
-- In `meta` and `matches`, the field holding a route's loaded data is `loaderData`, not
-  `data`.
-- Define routes with `Component:` and lazy-load route modules. Importing every page
-  statically puts the whole application in the initial bundle.
-- Give the router an error boundary. Narrow the thrown value before reading it — an
-  unchecked cast of a routing error is a crash inside the error handler.
+- Distinguish public and protected routes before changing authentication boundaries.
+- Reuse established initial and navigation loading presentation. Do not present
+  stale content as though navigation has completed.
+- Lazy-load route modules using the project's supported router conventions.
+- Give the router an error boundary. Narrow thrown values before reading them.
+
+## Auth
+
+When authentication is present, use the existing provider and shared session/token
+accessor. Configure the SDK before session-reading modules execute.
+
+- Delegate refresh to the provider and centralize group/role checks.
+- Browser permission checks control presentation; the API enforces access.
+- Inspect guard behavior and preserve public callbacks and public error routes.
 
 ## Effects and state
 
@@ -83,22 +82,22 @@ these hold is not.
 - **Never render a success branch that a failed request can reach.** Do not infer success
   from "not loading and no error" — model the states so the impossible combination cannot
   be represented.
+- Model mutations with explicit pending/success/failure states. Prevent repeated
+  activation and preserve control dimensions while pending.
 - Derive what can be derived. Do not mirror a prop or context value into state and sync it
   with an effect.
 
 ## Accessibility
 
-Every interface meets WCAG 2.2 AA. Accessibility is part of building the feature, not a pass that happens afterwards.
+Follow explicit project accessibility requirements. Apply WCAG conformance only
+when specified; use the requested version and level. Formal certification and
+comprehensive audits require an explicit scope.
 
-- Use the semantic element for the job. Something that performs an action is a button; something that navigates is a link. Never attach a click handler to a `div`, `span`, or icon element.
-- Every interactive element is reachable and operable by keyboard in a logical order, with a visible focus indicator. Never remove a focus outline without replacing it with something at least as clear.
-- Every control has an accessible name. An icon-only button needs an explicit label. Every image carries alt text, or empty alt when it is purely decorative.
-- Associate each input with its label, mark invalid fields programmatically, and link the error message to the field it describes. An error conveyed only by styled text is invisible to a screen reader.
-- A dialog identifies itself as a dialog, is labelled by its title, moves focus inward when it opens, keeps focus inside while it is open, closes on Escape, and returns focus to whatever opened it.
-- Announce asynchronous outcomes — loading, success, failure — in a live region. A message that only appears visually is never heard.
-- Meet AA contrast for text and for interactive controls. Never let colour alone carry meaning; pair it with text or a shape.
-- Honour the reduced-motion preference for animation and transitions.
-- Use real table markup for tabular data. `scope` belongs on a header cell, never on a data cell.
+- Use semantic HTML and keyboard-operable controls with visible focus.
+- Give controls accessible names and images appropriate alt text.
+- Associate form fields with labels and validation messages.
+- Do not rely on colour alone to communicate meaning.
+- Implement additional accessibility behavior required by the feature specification.
 
 ## Prefer boring code
 
@@ -170,6 +169,13 @@ meaningful workflow stages, and rationale. Do not optimize for fewer comments.
   and meaningful errors. Use the language's documentation style without forcing
   redundant tags or narrating every statement.
 
+## Deferred work
+
+- Before completing a development cycle, triage every added or changed TODO/FIXME.
+- Give temporary implementations a concrete replacement or removal trigger and
+  track deferred work in the project's existing spec, plan, or work tracker.
+- Resolve or update the TODO when a later cycle addresses the deferred work.
+
 ## Testing
 
 Every behavior change ships with a test that covers it. Tests follow the project's established layout and are named for the unit under test.
@@ -196,13 +202,27 @@ For this stack specifically:
 
 - Use the project's configured test runner and component-testing library. Follow the
   established test layout rather than introducing another one.
-- Query by role and accessible name, not by test id or class. A test that cannot find an
-  element by its accessible name has found a real accessibility bug.
+- Prefer roles and accessible names. Use test IDs only when semantic queries do
+  not meaningfully describe the target; investigate missing accessible names.
 - Cover the loading, error, and empty states, not only the populated one. Those are the
   branches users hit when something goes wrong.
 - Cover form validation: a submit that should fail, and the error text a user would see.
 - A project adopting this baseline may have no test harness at all. Setting one up is the
   first task, not a reason to skip the rule.
+
+## Test isolation
+
+- Set deterministic test configuration before importing application modules. Never
+  inherit developer service URLs, auth sessions, database URLs, or credentials.
+- Stub external boundaries and block unexpected outbound calls, including failures
+  caught by application code. Allow only explicitly configured disposable test
+  services or deterministic stubs.
+- Assert expected logs locally and fail on unexpected warnings/errors. Never mute
+  the entire suite to hide missing fixtures or genuine failures.
+- Keep automated tests independent of live services. Report explicitly authorized
+  live verification separately; it does not replace deterministic tests.
+- Follow existing test locations, naming, and shared setup. Do not reorganize tests
+  or introduce another runner as incidental feature work.
 
 ## Verification
 
@@ -234,29 +254,24 @@ Format: `type(scope): summary` — `feat`, `fix`, `refactor`, `docs`, `test`, `c
 
 ## Boundaries
 
-Stop and ask before any action that is hard to reverse. Approval for one action is not approval for the next.
+Explicit authorization covers the named scope and targets. Do not ask again for
+ordinary edits or operations already approved. Read existing files first and
+preserve unrelated work. Approval to implement phases does not authorize deployment
+or writes against live data.
 
-Requires asking first:
-- Deleting or overwriting files you did not create in this session.
-- Any database migration, schema change, or write against a non-local database.
-- `rm -rf`, history rewrites, force pushes, or dropping a branch.
-- Installing, upgrading, or removing dependencies.
-- Anything that touches CI configuration, deployment, or infrastructure.
-- Anything that sends data outward: opening a PR, posting to an API, sending a message.
-
-Before overwriting or deleting anything, read it first. Describe what will change and wait for a clear yes. If the answer is ambiguous, it is a no.
-
-This stack ships code to browsers and deploys to hosting. Ask before:
-
-- Any deploy or bucket sync, in any environment.
-- Adding, upgrading, or removing a dependency.
-- Changing the build, the container image, or the web server config.
+- Obtain explicit authorization for deployment/destruction, live-data writes,
+  migration execution, dependency changes, history rewrites, force pushes,
+  consequential deletion, external messages/PRs, or security-sensitive operations.
+- Requests covering schema, infrastructure, CI, build, hosting, or migration
+  authoring authorize those edits, not execution against a live target.
+- Ask when target, risk, or scope materially expands. Ambiguous permission is not
+  approval. Follow higher-priority per-action confirmation requirements.
 
 Stack-specific traps worth knowing before you touch them:
 
 - **Build-time environment variables are baked into the bundle and shipped to the
-  browser.** Never put a secret in one. Declare their interface so a missing variable is a
-  type error rather than a silent `undefined` that surfaces as a runtime failure.
+  browser.** Never put a secret in one. Declare configuration types and validate
+  required values; types alone cannot prove a build-time value was supplied.
 - Read `tsconfig.json` before choosing syntax. Compiler flags are project configuration;
   never infer them from another Vite application or restate their current values here.
 
@@ -265,6 +280,16 @@ Stack-specific traps worth knowing before you touch them:
 - Never paste a secret, token, internal hostname, or customer data into an external service, a commit, an issue, or a PR description.
 - Never write a credential into source. Read it from the environment at runtime, and add a placeholder to the example env file instead.
 - If you encounter a committed secret, stop and report it. Do not quote the value in the report.
+
+## Spec and plan requests
+
+- Treat a request to create or persist a spec or plan as documentation scope.
+  Write only the requested documents and explicitly requested related material.
+- Do not implement feature phases until requested. Approval for multiple phases
+  authorizes that range without repeated phase approval.
+- Stop for failed gates, missing authority, or material scope changes. Keep
+  execution evidence in the existing plan or tracking mechanism.
+- Distinguish implemented behavior from deployment readiness that remains unverified.
 
 ## Reporting
 

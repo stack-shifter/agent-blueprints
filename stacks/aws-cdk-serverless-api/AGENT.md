@@ -8,21 +8,24 @@ task overrides them.
 This code runs in production and touches real infrastructure. Deployment is never a step
 you take on your own initiative.
 
-**Assumed majors:** Node 24, TypeScript 5, AWS CDK 2. Only a few rules below
-depend on a major, and each says so where it does. If the project is on a different major,
-the project wins — change this file rather than follow a rule that no longer applies.
+Read manifests, lockfiles, compiler configuration, and installed types for
+supported versions and interfaces. Never infer them from another project.
 
 ## Project shape
 
-`bin/` holds the CDK app entry point. `lib/` holds the stacks. `src/` holds the
-application, layered. Follow the project's established test layout.
+Preserve the established architecture and test layout. The following describes
+preferred responsibilities; do not migrate a working application solely to add
+folders or a dependency-injection layer. Keep CDK entrypoints and stacks separate
+from runtime composition.
 
 The application layers, and what each one is forbidden to do:
 
 - `handlers/` — Lambda entry points and middleware composition only. No business logic,
   no SDK calls.
-- `middlewares/` — reusable middleware. Short-circuit by returning a response. Never
-  mutate the event.
+- `workers/` — scheduled/asynchronous entrypoints. Delegate to services; no
+  business logic, SDK calls, or HTTP request middleware.
+- `middlewares/` — reusable middleware. Short-circuit with a response. Replace
+  request fields only with deliberately validated schema output.
 - `controllers/` — extract parameters, orchestrate services and repositories, map errors
   to responses. Never call an AWS SDK client directly.
 - `services/` — business logic and SDK calls. Throws domain errors. Knows nothing about
@@ -47,56 +50,38 @@ resources as a real external write.
 
 ## Infrastructure
 
-Build on the shared construct library rather than hand-rolling API Gateway, Lambda
-integrations, and IAM wiring. Import it from the package root; deep imports are blocked.
+Extend installed construct libraries or existing local constructs. Verify exports,
+defaults, merging, and public-route overrides against their implementation. Never
+install a library or replace an API merely to match an example.
 
-Compose routes with the `RestApi` construct. Its props take `name`, `corsOrigins` as an
-array, and `defaultRouteOptions` for settings shared by every route. Its route methods are
-`get`, `post`, `put`, and `delete` — there is no separate by-id method, so a path
-parameter route is a `get` with the parameter in `routePath`.
-
-Each route's options take `functionName`, `entry`, `handler`, and `routePath`, plus
-`grants`, `scopes`, `requestParameters`, and `model` as needed. `routePath` must start
-with `/`.
-
-- Shared settings go in `defaultRouteOptions` once. Per-route options merge over them:
-  scalars overwrite, `environment` and `bundling` deep-merge, and `grants` are added to
-  the defaults rather than replacing them.
-- Set `inheritDefaults: false` to opt a route out of defaults entirely.
-- **To make one route public, pass `authorizer: null`.** Passing `undefined` means
-  "inherit the default", which leaves the route authorized. These are different values and
-  the distinction is deliberate.
-- Grant IAM with callbacks — `grants: [(fn) => table.grantReadData(fn)]` for a table,
-  `grants: [(fn) => secret.grantRead(fn)]` for a database credential. Grant each function
-  only the resources it uses. Never attach a broad policy to cover several routes.
-- Import existing infrastructure through the `Importer` helpers rather than scattering
-  `from*` lookups across the stack.
-- Use `LambdaNode` for a standalone function that is not an API route.
-
-Return responses through the framework's `RestResult` helpers — `ok`, `created`,
-`noContent`, `badRequest`, `notFound`, `forbidden`, `unauthorized`,
-`internalServerError`, `problem`. They are lower camelCase. Never hand-build a response
-object; that is how a header or a status code drifts.
+- Centralize shared route settings and use explicit overrides. Verify whether null
+  and undefined differ for authorizers; do not assume omission makes a route public.
+- Grant each function only the resources and object prefixes it uses.
+- Use supported package exports. Keep runtime imports separate from infrastructure
+  imports; check transitive imports for accidental CDK inclusion.
+- Use project response helpers consistently, preserving status, headers, CORS,
+  problem reasons, and field-error contracts.
 
 **Keep module-scope side effects out of anything `lib/` imports.** A stack that imports a
 handler module to reach a name constant evaluates that whole import chain during `cdk
 synth`. An SDK client constructed at module scope, or a required-environment assertion
 evaluated at import time, runs on every synth, diff, and deploy.
 
-**A handler's name string doubles as its construct id.** It must match the exported
-handler function's name so Lambda can find it, and it must be unique within the stack so
-two routes do not collide. Keep the names in one exported constant map and assert them in
-tests.
+Configured handler names must match actual function exports. Use existing
+side-effect-free metadata or verified strings; do not add a registry solely for
+this rule. Construct IDs must be unique. Explicit resource names must distinguish
+deployment environments.
 
 ## Errors and validation
 
 - Validate every request at the boundary with a schema. Keep schemas in
   `models/validation/`, one file per entity, each rule carrying an explicit human-readable
   message.
-- **Validation middleware validates; it does not transform.** Never assume a controller
-  receives coerced, defaulted, or stripped input — a numeric query parameter is still a
-  string. If you need the parsed value downstream, write it back onto the event
-  deliberately and say so.
+- Validation middleware owns parsed request input. Deliberately replace validated
+  fields with schema output so coercions, defaults, and stripped values survive.
+  Controllers may assert the parsed type only when configured validation runs first.
+- Give JSON parsing one owner: validation or the existing body parser. Preserve
+  parser errors and required authorization ordering; assertions do not parse input.
 - **Every error response carries the CORS headers**, including responses constructed
   inside middleware. A validation failure that reaches a browser as a CORS error instead
   of a 400 is a bug, and it is invisible from the server side.
@@ -104,8 +89,8 @@ tests.
   `name` string: the class name and the assigned `name` drift apart silently, and every
   branch stops matching without a test failing.
 - Catch as `unknown` and narrow before use. Keep `any` out of domain types.
-- Services throw domain errors. Controllers are the only layer that turns an error into a
-  status code.
+- Services throw domain errors; controllers translate them to HTTP responses.
+  Middleware may translate the boundary failures it owns.
 - **Do not assert required configuration with `!`.** Read and validate required
   environment variables once at startup and fail loudly naming the variable that is
   missing. A non-null assertion turns a misconfiguration into a confusing runtime error.
@@ -127,35 +112,49 @@ These hold whichever datastore you are on:
   reach.
 - Right-size memory and timeout per route rather than accepting one default everywhere.
 
-**When the datastore is DynamoDB.** Single-table with a partition key and sort key. Add a
-global secondary index for an alternate lookup rather than scanning. Build key strings in
-one place in the repository. Grant table and index access per function with grant
-callbacks. Cursor pagination follows from the query model — do not fake page numbers over
-it.
+**When the datastore is DynamoDB.** Model keys and indexes around actual access
+patterns; preserve the existing table design rather than forcing single-table
+architecture. Build keys in repositories, avoid unnecessary scans, and grant
+required table/index access per function. Cursor pagination follows the query model.
 
 **When the datastore is SQL.** Normalize, and let constraints do their job: primary and
 foreign keys, unique and check constraints in the schema rather than only in application
 code. Add a named index per access pattern you actually have, not per column you might
 filter on.
 
-- **Migrations are committed to the repository and applied by CI.** Never run a migration
-  by hand against a deployed database, and never edit a migration that has already been
-  applied — add a new one.
-- Transactions own atomicity; take row locks inside the repository that needs them. Keep
-  a transaction as short as the invariant requires and never hold one across a network
-  call to another service.
+- Commit migrations and normally apply them through CI. Explicitly authorized
+  manual execution requires verifying the exact target and scope. Never edit an
+  applied migration; add a new one unless a disposable history rewrite is authorized.
+- Transactions own atomicity. Use narrowly scoped locks for demonstrated integrity
+  invariants and explain why. Document limits of application-only checks. Never
+  hold transactions across external network calls.
 - **Mind the connection budget.** Lambda scales horizontally and every concurrent
   execution wants its own connection, so concurrency multiplied by pool size can exhaust
   the server long before your traffic does. Put a pooler in front of the database, keep
   the per-function pool small, and treat a connection limit as a capacity number you
   reason about rather than discover in an incident.
-- A function that reaches a database in a VPC must be placed in that VPC with egress, and
-  granted the credential it reads. That placement changes cold starts — do it
-  deliberately, not by default for every route.
-- Use an idempotency key for any operation a client may retry, and a transactional outbox
-  when a write must also produce an event. Both belong in the repository layer.
+- Configure VPC access only when database network topology requires it. Provide
+  required routes/egress and credential access; public TLS endpoints do not
+  automatically require a Lambda VPC.
+- Add idempotency/replay storage or a transactional outbox for an explicit contract
+  or demonstrated correctness need. Do not add them merely because retries exist.
+  Keep required persistence in repositories.
 - Numbered pagination is fine over SQL. Do not force a cursor model onto it because
   another service in the estate uses one.
+
+**When using object storage.** Remove business rows first only when owed cleanup
+is recorded durably and atomically. For expired uploads/exports, delete objects
+before removing tracking rows and retain failures for retry. Handle partial batch
+failures, use persisted keys, and recheck pending-upload eligibility before storage
+work. Database removal and lifecycle policies do not prove object deletion.
+
+## Runtime layout
+
+- Use named models/interfaces for object return types, including Promise results.
+- Await into descriptive local variables before returning or constructing responses.
+  Keep awaits inside their existing try/catch blocks to preserve rejection handling.
+- In controllers, services, and repositories, order public operations Create → Read
+  → Update → Delete when present; keep constructors first and helpers afterward.
 
 ## Prefer boring code
 
@@ -227,6 +226,13 @@ meaningful workflow stages, and rationale. Do not optimize for fewer comments.
   and meaningful errors. Use the language's documentation style without forcing
   redundant tags or narrating every statement.
 
+## Deferred work
+
+- Before completing a development cycle, triage every added or changed TODO/FIXME.
+- Give temporary implementations a concrete replacement or removal trigger and
+  track deferred work in the project's existing spec, plan, or work tracker.
+- Resolve or update the TODO when a later cycle addresses the deferred work.
+
 ## Testing
 
 Every behavior change ships with a test that covers it. Tests follow the project's established layout and are named for the unit under test.
@@ -251,14 +257,36 @@ Mock at external boundaries and deliberate architectural seams, nowhere else.
 
 For this stack specifically:
 
-- Mock at the AWS SDK boundary and nowhere else. Inject a stub document client into a
-  repository rather than intercepting the module.
+- Stub AWS SDK boundaries through existing seams rather than module interception.
+- For SQL integration tests, use disposable databases with committed migrations
+  and baseline fixtures. Mocked queries or another engine do not verify
+  engine-specific constraints and transactions.
 - Test middleware behavior directly against a constructed request object. Handler tests
-  verify composition — that the middleware is wired and the controller is called — not
-  middleware behavior.
+  verify composed behavior through observable responses, not internal call counts.
 - **Write template assertions for `lib/`.** Synthesize the stack and assert the resources
   it produces: permissions granted, environment variables set, authorizer attached. Stacks
   are code, and an unasserted stack is untested infrastructure.
+
+- Template tests may disable bundling; separately verify real runtime bundles for
+  entrypoints, accidental CDK inclusion, and size regressions.
+- Local claim fixtures and synthesis do not verify deployed authorization. Report
+  live authorization evidence separately.
+- Test that composed validation passes coerced/defaulted/stripped values downstream
+  and that parser and authorization failures retain their status and CORS headers.
+
+## Test isolation
+
+- Set deterministic test configuration before importing application modules. Never
+  inherit developer service URLs, auth sessions, database URLs, or credentials.
+- Stub external boundaries and block unexpected outbound calls, including failures
+  caught by application code. Allow only explicitly configured disposable test
+  services or deterministic stubs.
+- Assert expected logs locally and fail on unexpected warnings/errors. Never mute
+  the entire suite to hide missing fixtures or genuine failures.
+- Keep automated tests independent of live services. Report explicitly authorized
+  live verification separately; it does not replace deterministic tests.
+- Follow existing test locations, naming, and shared setup. Do not reorganize tests
+  or introduce another runner as incidental feature work.
 
 ## Verification
 
@@ -293,24 +321,18 @@ Format: `type(scope): summary` — `feat`, `fix`, `refactor`, `docs`, `test`, `c
 
 ## Boundaries
 
-Stop and ask before any action that is hard to reverse. Approval for one action is not approval for the next.
+Explicit authorization covers the named scope and targets. Do not ask again for
+ordinary edits or operations already approved. Read existing files first and
+preserve unrelated work. Approval to implement phases does not authorize deployment
+or writes against live data.
 
-Requires asking first:
-- Deleting or overwriting files you did not create in this session.
-- Any database migration, schema change, or write against a non-local database.
-- `rm -rf`, history rewrites, force pushes, or dropping a branch.
-- Installing, upgrading, or removing dependencies.
-- Anything that touches CI configuration, deployment, or infrastructure.
-- Anything that sends data outward: opening a PR, posting to an API, sending a message.
-
-Before overwriting or deleting anything, read it first. Describe what will change and wait for a clear yes. If the answer is ambiguous, it is a no.
-
-This stack deploys real infrastructure. Ask before:
-
-- Any `cdk deploy`, `cdk destroy`, or data migration script, in any environment.
-- Changing a table's schema, keys, indexes, removal policy, or deletion protection.
-- Writing or applying a database migration.
-- Anything touching the AWS profile, the CI role, or deployment workflows.
+- Obtain explicit authorization for deployment/destruction, live-data writes,
+  migration execution, dependency changes, history rewrites, force pushes,
+  consequential deletion, external messages/PRs, or security-sensitive operations.
+- Requests covering schema, infrastructure, CI, build, hosting, or migration
+  authoring authorize those edits, not execution against a live target.
+- Ask when target, risk, or scope materially expands. Ambiguous permission is not
+  approval. Follow higher-priority per-action confirmation requirements.
 
 Production datastores carry deletion protection and a retain policy. **Never lower either
 to make a deploy succeed** — a deploy that requires it is a deploy that would destroy
@@ -321,6 +343,16 @@ data. Stop and report what the diff shows instead.
 - Never paste a secret, token, internal hostname, or customer data into an external service, a commit, an issue, or a PR description.
 - Never write a credential into source. Read it from the environment at runtime, and add a placeholder to the example env file instead.
 - If you encounter a committed secret, stop and report it. Do not quote the value in the report.
+
+## Spec and plan requests
+
+- Treat a request to create or persist a spec or plan as documentation scope.
+  Write only the requested documents and explicitly requested related material.
+- Do not implement feature phases until requested. Approval for multiple phases
+  authorizes that range without repeated phase approval.
+- Stop for failed gates, missing authority, or material scope changes. Keep
+  execution evidence in the existing plan or tracking mechanism.
+- Distinguish implemented behavior from deployment readiness that remains unverified.
 
 ## Reporting
 

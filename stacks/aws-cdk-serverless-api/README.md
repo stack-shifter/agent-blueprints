@@ -5,18 +5,21 @@ Vault-internal. Never copied out.
 ## Pick this when
 
 You are building or maintaining a production serverless HTTP API on AWS — API Gateway and
-Lambda — with CDK, composed from a shared construct library. The datastore may be DynamoDB
-or SQL; the baseline covers both and marks which rules depend on the choice.
+Lambda — with CDK, extending installed libraries or local constructs. The datastore
+may be DynamoDB or SQL; the baseline marks which rules depend on the choice.
 
 ## Assumes
 
-- TypeScript, Node 24+, CDK app with `bin/`, `lib/`, and a layered `src/`.
-- Routes composed through the shared library's `RestApi`, not hand-rolled API Gateway
-  wiring; IAM granted with callbacks.
-- Middleware-composed Lambda handlers and schema validation at the boundary.
-- A datastore reached through repositories — single-table DynamoDB, or SQL with committed
-  migrations and a pooled connection budget.
-- Cognito authorizers at the gateway; `authorizer: null` for a public route.
+- TypeScript, Node, AWS CDK, and layered runtime responsibilities; installed
+  configuration determines versions and interfaces. Preserve existing folder layout.
+- Extend installed construct libraries or existing local constructs. Verify exports,
+  default merging, authorizer overrides, and runtime/infrastructure import boundaries.
+- HTTP handlers compose middleware; asynchronous workers delegate to services.
+- Validation deliberately passes parsed schema output to controllers.
+- Repositories own persistence. Preserve DynamoDB access patterns or SQL constraints,
+  committed migrations, narrowly justified locks, and connection capacity.
+- Tests isolate configuration and external calls. SQL integration tests use a
+  disposable database; bundle checks complement infrastructure template assertions.
 
 ## Pick the sibling instead when
 
@@ -33,8 +36,10 @@ with an existing codebase in those specific places; that disagreement is the poi
 
 ## Snippet subset
 
-Carries twelve of the fourteen snippets. It omits `accessibility/wcag-aa-baseline` because
-the API has no user interface, and `typing/python-type-hints` because it is TypeScript.
+Carries fifteen snippets, including scoped authorization, test isolation, deferred
+work, and spec/plan scope. Omits both accessibility variants because this API has no
+interface, Python typing because it uses TypeScript, and repeated-approval guidance
+in favor of approved scope. Shared wording is pasted in full and remains standalone.
 
 ## Status
 
