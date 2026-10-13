@@ -53,7 +53,7 @@ nothing matched.
 
 ## Note on the snippet subset
 
-Carries ten of the fourteen snippets. It omits:
+Carries eleven snippets, including README consistency. It omits:
 
 - `accessibility/wcag-aa-baseline` — no user interface.
 - `typing/strict-typescript` and `typing/python-type-hints` — wrong languages. The C#

@@ -1,6 +1,6 @@
 # agent-blueprints
 
-A manual-copy vault for `AGENT.md` rules, sub-agent personas, and reusable rule blocks.
+A manual-copy vault for `AGENTS.md` rules, sub-agent personas, and reusable rule blocks.
 
 Not a sync tool, not a build system, no scripts. You open a file, copy it, and paste it
 where you need it.
@@ -24,7 +24,7 @@ Three directories, one per paste size.
 
 | Directory | You copy | Into |
 |---|---|---|
-| `stacks/` | An entire `AGENT.md` for a project | `.claude/CLAUDE.md` |
+| `stacks/` | An entire `AGENTS.md` for a project | `.claude/CLAUDE.md` |
 | `sub-agents/` | One persona for one job | `.claude/agents/`, or a conversation |
 | `snippets/` | One rule | An existing agent file |
 
@@ -33,11 +33,11 @@ three, and explains how to instantiate one.
 
 ## Using it
 
-**Starting a project.** Pick a stack, copy its `AGENT.md`:
+**Starting a project.** Pick a stack, copy its `AGENTS.md`:
 
 ```bash
 mkdir -p .claude
-cp ~/Code/stack-shifter/agent-blueprints/stacks/aws-cdk-serverless-api/AGENT.md .claude/CLAUDE.md
+cp ~/Code/stack-shifter/agent-blueprints/stacks/aws-cdk-serverless-api/AGENTS.md .claude/CLAUDE.md
 ```
 
 Then edit the copy freely. Project-specific rules belong in the copy, never upstream — the
@@ -147,6 +147,7 @@ the right heading depth.
 
 | Snippet | Rule |
 |---|---|
+| [`documentation/readme-consistency`](snippets/documentation/readme-consistency.md) | Familiar README organization, preserved detail, scoped edits, verified claims |
 | [`accessibility/project-requirements`](snippets/accessibility/project-requirements.md) | Semantic and keyboard basics; WCAG conformance only when specified |
 | [`accessibility/wcag-aa-baseline`](snippets/accessibility/wcag-aa-baseline.md) | WCAG 2.2 AA: semantic elements, keyboard operability, accessible names, dialog semantics, live regions |
 | [`style/prefer-boring-code`](snippets/style/prefer-boring-code.md) | Choose the implementation a mid-level developer reads once; abstract on the third occurrence, not the second |

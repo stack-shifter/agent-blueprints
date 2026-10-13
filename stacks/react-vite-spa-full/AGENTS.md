@@ -1,11 +1,8 @@
-# React SPA (Vite) — Agent Baseline
+# React SPA (Vite, full stack) — Agent Baseline
 
-Rules for working in a React single-page application built with Vite and TypeScript. They
-apply to every file unless a more specific instruction in the task overrides them.
-
-This baseline assumes React, Vite, TypeScript, and React Router, and nothing else.
-Authentication, styling, forms, and data fetching are project decisions — follow whatever
-the repository already does.
+Rules for working in a React single-page application built with Vite and TypeScript,
+using Cognito hosted-UI auth, Bootstrap, and React Hook Form with Zod. They apply to
+every file unless a more specific instruction in the task overrides them.
 
 Read manifests, lockfiles, compiler configuration, and installed types for
 supported versions and interfaces. Never infer them from another project.
@@ -57,12 +54,51 @@ middleware, lazy-loading APIs, and route-data fields against installed router ty
 
 ## Auth
 
-When authentication is present, use the existing provider and shared session/token
-accessor. Configure the SDK before session-reading modules execute.
+Cognito hosted UI through Amplify.
 
-- Delegate refresh to the provider and centralize group/role checks.
-- Browser permission checks control presentation; the API enforces access.
-- Inspect guard behavior and preserve public callbacks and public error routes.
+- Configure Amplify once before application modules that read sessions execute.
+  Account for static-import evaluation order, not only entry-point call order.
+- Retrieve the session and access token through one shared accessor. Token refresh is the
+  library's job — never hand-roll expiry checks or a refresh interceptor.
+- Centralise group and role checks in one helper. The same membership comparison inlined
+  across several places is how one of them silently gets it wrong.
+- Authorization in the browser is presentation, not enforcement. Hiding a control does not
+  protect the operation behind it; the API must enforce it too.
+- An unconditional guard around the router blocks public pages. Inspect its actual
+  behavior before adding callbacks, public error routes, or marketing pages.
+
+## Forms and validation
+
+React Hook Form with a Zod resolver.
+
+- Inputs are uncontrolled, registered with `register()`. Reach for `Controller` only when
+  a control cannot forward a ref.
+- Schemas live in one validation directory, one file per entity. Every rule carries an
+  explicit, human-readable message. Export the inferred type alongside the schema rather
+  than restating the shape by hand.
+- Always supply `defaultValues`. An input that starts undefined and later receives a value
+  switches from uncontrolled to controlled and warns.
+- Model mutation pending/success/failure explicitly. Prevent repeated submission,
+  disable affected inputs, and preserve button dimensions during loading.
+- Map server-side failures back onto the fields that caused them. A validation error that
+  only appears as a toast leaves the user hunting for the bad field.
+- Transform values at the boundary — parse on the way in, format on the way out. Do not
+  mutate the submitted object in the submit handler.
+
+## Styling
+
+Bootstrap loaded through SCSS.
+
+- One co-located stylesheet per component. Namespace class names
+  `block__element--modifier` so a global stylesheet behaves like a scoped one.
+- Reserve the global stylesheet for design tokens, resets, and genuinely shared utilities.
+  A one-off rule for a single component does not belong there.
+- Prefer existing components and utilities over duplicate CSS. Customize Bootstrap
+  through supported variables and shared project theme tokens.
+- **Define each breakpoint once.** A pixel value duplicated between a media query and a
+  measuring hook will drift, and the two will disagree about what "mobile" means.
+- Import a stylesheet you depend on. Applying classes from a library that was never
+  imported produces markup that silently does nothing.
 
 ## Effects and state
 
@@ -290,6 +326,62 @@ Stack-specific traps worth knowing before you touch them:
 - Stop for failed gates, missing authority, or material scope changes. Keep
   execution evidence in the existing plan or tracking mechanism.
 - Distinguish implemented behavior from deployment readiness that remains unverified.
+
+## README Consistency Standard
+
+Give readers a concise, familiar entry point. Standardize organization, not content,
+tooling, or architecture; preserve useful repository-specific information.
+
+### Recommended section order
+
+Use these names and this order where applicable; omit irrelevant sections.
+
+1. **Purpose** — Briefly explain what the repository does, who uses it, and its
+   responsibility within the broader application.
+2. **Architecture / Repository Overview** — Describe major components and connections;
+   for docs repositories, describe organization and sources of truth. Include a small
+   diagram only when it clarifies a relationship; accuracy matters more than format.
+3. **Prerequisites and Configuration** — Identify tools, external resources, and required
+   values before commands that need them. Separate local and deployment requirements;
+   explain value sources, generated values, and public exposure. Never include secrets.
+4. **Local Setup and Usage** — Give complete, ordered steps using actual package scripts,
+   including tests/checks. For docs repositories, explain navigation, editing, preview,
+   and validation instead of inventing application workflows.
+5. **Deployment / Publishing** — Where applicable, separate Development and Production,
+   first-time preparation and routine releases. Explain triggers, configuration,
+   migration ordering, and publishing risks; link detailed runbooks.
+6. **Teardown / Cleanup** — Show supported commands and exact targets where applicable.
+   State what is deleted, retained, imported, or needs separate cleanup. Never imply
+   stack destruction removes every related resource.
+7. **Operational Notes and Limitations** — Include troubleshooting, compatibility, and
+   deferred capabilities. Distinguish implemented behavior, known limitations, and
+   checks or deployment behavior not yet verified.
+8. **References** — Link useful specs, testing guides, contracts, and runbooks. Reuse
+   existing indexes rather than adding exhaustive document catalogs.
+
+### Content and editing rules
+
+- Review the existing README and current source before reorganizing. Preserve important
+  information; remove only duplication, obsolete guidance, or inaccuracies. When moving
+  detail to a runbook, retain a short explanation and a working README link.
+- Preserve API endpoints, authentication, configuration, database deployment,
+  workers/retries, test prerequisites, and migration safety when applicable.
+- Preserve UI routes, authentication/loading, environment variables, build labels,
+  API connection requirements, and deployment details when applicable.
+- Preserve docs requirements, prototypes, company standards, ownership, navigation,
+  editing, and validation conventions. Put route/endpoint references near the overview
+  or in a clearly named section nearby; do not force awkward placement.
+- Keep commands copyable, correctly scoped, and consistent with scripts and pipelines.
+  Do not impose another repository's framework, runner, environments, or architecture.
+- Avoid completed-cycle handoffs, repeated spec narratives, and speculative features
+  presented as current behavior. README refresh work does not authorize runtime code,
+  infrastructure, dependency, or deployment changes.
+
+### Verification
+
+Verify commands, routes, configuration, links, and operational claims against current
+source. Run applicable Markdown formatting and whitespace checks. Report unverified
+statements plainly; local tests alone do not establish production readiness.
 
 ## Reporting
 

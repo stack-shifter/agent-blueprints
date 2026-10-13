@@ -50,7 +50,7 @@ ones. A rule that changes with a file's length is a rule nobody applies consiste
 
 ## Snippet subset
 
-Carries thirteen of the fourteen snippets. It omits `typing/python-type-hints` because this
+Carries fourteen snippets, including README consistency. It omits `typing/python-type-hints` because this
 is a TypeScript stack.
 
 ## Status

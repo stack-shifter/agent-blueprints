@@ -25,7 +25,7 @@ in the deploy.
 
 ## Snippet subset
 
-Carries twelve of the fourteen snippets. It omits `accessibility/wcag-aa-baseline` because
+Carries thirteen snippets, including README consistency. It omits `accessibility/wcag-aa-baseline` because
 the library has no user interface, and `typing/python-type-hints` because it is TypeScript.
 
 ## Status

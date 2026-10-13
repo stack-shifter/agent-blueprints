@@ -26,7 +26,7 @@ That separation is deliberate: completed prototype phases never imply shipped so
 
 This is the only baseline that pastes **part** of `snippets/`, because most of them assume
 code. It carries accessibility, prefer-boring-code, comments, verify-before-done, both git
-snippets, and both safety snippets.
+snippets, both safety snippets, and the README consistency standard.
 
 It deliberately omits:
 

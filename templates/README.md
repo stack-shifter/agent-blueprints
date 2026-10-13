@@ -15,7 +15,7 @@ templates/  →  stacks/ sub-agents/ snippets/  →  a project
 
 | Template | Produces | Which lands in |
 |---|---|---|
-| [`stack-agent.template.md`](stack-agent.template.md) | `stacks/<stack>/AGENT.md` | `.claude/CLAUDE.md` |
+| [`stack-agent.template.md`](stack-agent.template.md) | `stacks/<stack>/AGENTS.md` | `.claude/CLAUDE.md` |
 | [`sub-agent.template.md`](sub-agent.template.md) | `sub-agents/claude/<role>.md` | `.claude/agents/` |
 | [`codex-agent.template.toml`](codex-agent.template.toml) | `sub-agents/codex/<role>.toml` | `.codex/agents/` |
 | [`snippet.template.md`](snippet.template.md) | `snippets/<topic>/<rule>.md` | an existing agent file |

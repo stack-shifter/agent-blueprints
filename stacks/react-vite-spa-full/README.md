@@ -40,10 +40,12 @@ WCAG conformance applies only when the project specifies a version and level.
 
 ## Snippet subset
 
-Carries the same sixteen snippets as lite, with shared wording pasted in full.
+Carries the same seventeen snippets as lite, with shared wording pasted in full.
 Uses conditional accessibility and scoped authorization, plus test isolation,
 deferred work, and spec/plan scope. Omits Python typing. Full remains a standalone
 superset of lite's guidance; the house libraries add stack-specific requirements.
+
+All stacks carry the canonical README consistency standard in full.
 
 ## Status
 

@@ -36,10 +36,12 @@ with an existing codebase in those specific places; that disagreement is the poi
 
 ## Snippet subset
 
-Carries fifteen snippets, including scoped authorization, test isolation, deferred
+Carries sixteen snippets, including scoped authorization, test isolation, deferred
 work, and spec/plan scope. Omits both accessibility variants because this API has no
 interface, Python typing because it uses TypeScript, and repeated-approval guidance
 in favor of approved scope. Shared wording is pasted in full and remains standalone.
+
+All stacks carry the canonical README consistency standard in full.
 
 ## Status
 

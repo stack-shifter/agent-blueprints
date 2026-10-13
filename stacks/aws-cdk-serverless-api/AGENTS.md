@@ -1,160 +1,140 @@
 # AWS Serverless API (CDK + Lambda) — Agent Baseline
 
-Rules for working in a production serverless API built with AWS CDK, API Gateway, and
-Lambda. The datastore may be DynamoDB or a SQL database; the rules below say which parts
-depend on that choice. They apply to every file unless a more specific instruction in the
-task overrides them.
+Rules for working in a production serverless API built with AWS CDK, API Gateway, and Lambda. The datastore may
+be DynamoDB or a SQL database; the rules below say which parts depend on that choice. They apply to every file
+unless a more specific instruction in the task overrides them.
 
-This code runs in production and touches real infrastructure. Deployment is never a step
-you take on your own initiative.
+This code runs in production and touches real infrastructure. Deployment is never a step you take on your own
+initiative.
 
-Read manifests, lockfiles, compiler configuration, and installed types for
-supported versions and interfaces. Never infer them from another project.
+Read manifests, lockfiles, compiler configuration, and installed types for supported versions and interfaces.
+Never infer them from another project.
 
 ## Project shape
 
-Preserve the established architecture and test layout. The following describes
-preferred responsibilities; do not migrate a working application solely to add
-folders or a dependency-injection layer. Keep CDK entrypoints and stacks separate
-from runtime composition.
+Preserve the established architecture and test layout. The following describes preferred responsibilities; do
+not migrate a working application solely to add folders or a dependency-injection layer. Keep CDK entrypoints
+and stacks separate from runtime composition.
 
 The application layers, and what each one is forbidden to do:
 
-- `handlers/` — Lambda entry points and middleware composition only. No business logic,
-  no SDK calls.
-- `workers/` — scheduled/asynchronous entrypoints. Delegate to services; no
-  business logic, SDK calls, or HTTP request middleware.
-- `middlewares/` — reusable middleware. Short-circuit with a response. Replace
-  request fields only with deliberately validated schema output.
-- `controllers/` — extract parameters, orchestrate services and repositories, map errors
-  to responses. Never call an AWS SDK client directly.
-- `services/` — business logic and SDK calls. Throws domain errors. Knows nothing about
-  HTTP.
-- `data/` — repositories. Owns key construction and persistence. Wraps every failure in a
-  domain error. Knows nothing about HTTP.
+- `handlers/` — Lambda entry points and middleware composition only. No business logic, no SDK calls.
+- `workers/` — scheduled/asynchronous entrypoints. Delegate to services; no business logic, SDK calls, or HTTP
+  request middleware.
+- `middlewares/` — reusable middleware. Short-circuit with a response. Replace request fields only with
+  deliberately validated schema output.
+- `controllers/` — extract parameters, orchestrate services and repositories, map errors to responses. Never
+  call an AWS SDK client directly.
+- `services/` — business logic and SDK calls. Throws domain errors. Knows nothing about HTTP.
+- `data/` — repositories. Owns key construction and persistence. Wraps every failure in a domain error. Knows
+  nothing about HTTP.
 - `models/validation/` — schemas, one file per entity.
 
-A layer may call downward, never upward. If a controller needs something from another
-controller, the logic belongs in a service.
+A layer may call downward, never upward. If a controller needs something from another controller, the logic
+belongs in a service.
 
 ## Toolchain
 
-npm and the AWS CDK CLI. Read `package.json` for the repository's build, test, diff,
-deploy, and local-development scripts. Their names, account flags, profiles, and composed
-checks are project configuration. If a script is missing, report it rather than composing
-an equivalent CDK command by hand.
+npm and the AWS CDK CLI. Read `package.json` for the repository's build, test, diff, deploy, and
+local-development scripts. Their names, account flags, profiles, and composed checks are project configuration.
+If a script is missing, report it rather than composing an equivalent CDK command by hand.
 
-Never deploy without being asked. Do not assume a command named "local" is a sandbox:
-inspect the script and synthesized configuration, and treat access to imported or remote
-resources as a real external write.
+Never deploy without being asked. Do not assume a command named "local" is a sandbox: inspect the script and
+synthesized configuration, and treat access to imported or remote resources as a real external write.
 
 ## Infrastructure
 
-Extend installed construct libraries or existing local constructs. Verify exports,
-defaults, merging, and public-route overrides against their implementation. Never
-install a library or replace an API merely to match an example.
+Extend installed construct libraries or existing local constructs. Verify exports, defaults, merging, and
+public-route overrides against their implementation. Never install a library or replace an API merely to match
+an example.
 
-- Centralize shared route settings and use explicit overrides. Verify whether null
-  and undefined differ for authorizers; do not assume omission makes a route public.
+- Centralize shared route settings and use explicit overrides. Verify whether null and undefined differ for
+  authorizers; do not assume omission makes a route public.
 - Grant each function only the resources and object prefixes it uses.
-- Use supported package exports. Keep runtime imports separate from infrastructure
-  imports; check transitive imports for accidental CDK inclusion.
-- Use project response helpers consistently, preserving status, headers, CORS,
-  problem reasons, and field-error contracts.
+- Use supported package exports. Keep runtime imports separate from infrastructure imports; check transitive
+  imports for accidental CDK inclusion.
+- Use project response helpers consistently, preserving status, headers, CORS, problem reasons, and field-error
+  contracts.
 
-**Keep module-scope side effects out of anything `lib/` imports.** A stack that imports a
-handler module to reach a name constant evaluates that whole import chain during `cdk
-synth`. An SDK client constructed at module scope, or a required-environment assertion
-evaluated at import time, runs on every synth, diff, and deploy.
+**Keep module-scope side effects out of anything `lib/` imports.** A stack that imports a handler module to
+reach a name constant evaluates that whole import chain during `cdk synth`. An SDK client constructed at module
+scope, or a required-environment assertion evaluated at import time, runs on every synth, diff, and deploy.
 
-Configured handler names must match actual function exports. Use existing
-side-effect-free metadata or verified strings; do not add a registry solely for
-this rule. Construct IDs must be unique. Explicit resource names must distinguish
-deployment environments.
+Configured handler names must match actual function exports. Use existing side-effect-free metadata or verified
+strings; do not add a registry solely for this rule. Construct IDs must be unique. Explicit resource names must
+distinguish deployment environments.
 
 ## Errors and validation
 
-- Validate every request at the boundary with a schema. Keep schemas in
-  `models/validation/`, one file per entity, each rule carrying an explicit human-readable
-  message.
-- Validation middleware owns parsed request input. Deliberately replace validated
-  fields with schema output so coercions, defaults, and stripped values survive.
-  Controllers may assert the parsed type only when configured validation runs first.
-- Give JSON parsing one owner: validation or the existing body parser. Preserve
-  parser errors and required authorization ordering; assertions do not parse input.
-- **Every error response carries the CORS headers**, including responses constructed
-  inside middleware. A validation failure that reaches a browser as a CORS error instead
-  of a 400 is a bug, and it is invisible from the server side.
-- **Route errors on typed error classes with `instanceof`.** Never branch on an error's
-  `name` string: the class name and the assigned `name` drift apart silently, and every
-  branch stops matching without a test failing.
+- Validate every request at the boundary with a schema. Keep schemas in `models/validation/`, one file per
+  entity, each rule carrying an explicit human-readable message.
+- Validation middleware owns parsed request input. Deliberately replace validated fields with schema output so
+  coercions, defaults, and stripped values survive. Controllers may assert the parsed type only when configured
+  validation runs first.
+- Give JSON parsing one owner: validation or the existing body parser. Preserve parser errors and required
+  authorization ordering; assertions do not parse input.
+- **Every error response carries the CORS headers**, including responses constructed inside middleware. A
+  validation failure that reaches a browser as a CORS error instead of a 400 is a bug, and it is invisible from
+  the server side.
+- **Route errors on typed error classes with `instanceof`.** Never branch on an error's `name` string: the class
+  name and the assigned `name` drift apart silently, and every branch stops matching without a test failing.
 - Catch as `unknown` and narrow before use. Keep `any` out of domain types.
-- Services throw domain errors; controllers translate them to HTTP responses.
-  Middleware may translate the boundary failures it owns.
-- **Do not assert required configuration with `!`.** Read and validate required
-  environment variables once at startup and fail loudly naming the variable that is
-  missing. A non-null assertion turns a misconfiguration into a confusing runtime error.
+- Services throw domain errors; controllers translate them to HTTP responses. Middleware may translate the
+  boundary failures it owns.
+- **Do not assert required configuration with `!`.** Read and validate required environment variables once at
+  startup and fail loudly naming the variable that is missing. A non-null assertion turns a misconfiguration
+  into a confusing runtime error.
 
 ## Data access
 
 These hold whichever datastore you are on:
 
-- Repositories own persistence. Query construction, keys, locks, and transactions live
-  there — never in a controller.
-- Keep HTTP and domain types independent of storage rows. A row shape is not an API
-  contract, and letting one become the other couples your public surface to a schema
-  change.
-- Repositories map persistence failures to domain errors and never leak a raw driver or
-  SDK exception upward.
-- **Writes spanning two stores have no transaction.** When a write touches an external
-  service and your datastore, write so a partial failure is recoverable: create the
-  durable record first, or implement compensation. Never leave a record no route can
-  reach.
+- Repositories own persistence. Query construction, keys, locks, and transactions live there — never in a
+  controller.
+- Keep HTTP and domain types independent of storage rows. A row shape is not an API contract, and letting one
+  become the other couples your public surface to a schema change.
+- Repositories map persistence failures to domain errors and never leak a raw driver or SDK exception upward.
+- **Writes spanning two stores have no transaction.** When a write touches an external service and your
+  datastore, write so a partial failure is recoverable: create the durable record first, or implement
+  compensation. Never leave a record no route can reach.
 - Right-size memory and timeout per route rather than accepting one default everywhere.
 
-**When the datastore is DynamoDB.** Model keys and indexes around actual access
-patterns; preserve the existing table design rather than forcing single-table
-architecture. Build keys in repositories, avoid unnecessary scans, and grant
-required table/index access per function. Cursor pagination follows the query model.
+**When the datastore is DynamoDB.** Model keys and indexes around actual access patterns; preserve the existing
+table design rather than forcing single-table architecture. Build keys in repositories, avoid unnecessary scans,
+and grant required table/index access per function. Cursor pagination follows the query model.
 
-**When the datastore is SQL.** Normalize, and let constraints do their job: primary and
-foreign keys, unique and check constraints in the schema rather than only in application
-code. Add a named index per access pattern you actually have, not per column you might
-filter on.
+**When the datastore is SQL.** Normalize, and let constraints do their job: primary and foreign keys, unique and
+check constraints in the schema rather than only in application code. Add a named index per access pattern you
+actually have, not per column you might filter on.
 
-- Commit migrations and normally apply them through CI. Explicitly authorized
-  manual execution requires verifying the exact target and scope. Never edit an
-  applied migration; add a new one unless a disposable history rewrite is authorized.
-- Transactions own atomicity. Use narrowly scoped locks for demonstrated integrity
-  invariants and explain why. Document limits of application-only checks. Never
-  hold transactions across external network calls.
-- **Mind the connection budget.** Lambda scales horizontally and every concurrent
-  execution wants its own connection, so concurrency multiplied by pool size can exhaust
-  the server long before your traffic does. Put a pooler in front of the database, keep
-  the per-function pool small, and treat a connection limit as a capacity number you
-  reason about rather than discover in an incident.
-- Configure VPC access only when database network topology requires it. Provide
-  required routes/egress and credential access; public TLS endpoints do not
-  automatically require a Lambda VPC.
-- Add idempotency/replay storage or a transactional outbox for an explicit contract
-  or demonstrated correctness need. Do not add them merely because retries exist.
-  Keep required persistence in repositories.
-- Numbered pagination is fine over SQL. Do not force a cursor model onto it because
-  another service in the estate uses one.
+- Commit migrations and normally apply them through CI. Explicitly authorized manual execution requires
+  verifying the exact target and scope. Never edit an applied migration; add a new one unless a disposable
+  history rewrite is authorized.
+- Transactions own atomicity. Use narrowly scoped locks for demonstrated integrity invariants and explain why.
+  Document limits of application-only checks. Never hold transactions across external network calls.
+- **Mind the connection budget.** Lambda scales horizontally and every concurrent execution wants its own
+  connection, so concurrency multiplied by pool size can exhaust the server long before your traffic does. Put a
+  pooler in front of the database, keep the per-function pool small, and treat a connection limit as a capacity
+  number you reason about rather than discover in an incident.
+- Configure VPC access only when database network topology requires it. Provide required routes/egress and
+  credential access; public TLS endpoints do not automatically require a Lambda VPC.
+- Add idempotency/replay storage or a transactional outbox for an explicit contract or demonstrated correctness
+  need. Do not add them merely because retries exist. Keep required persistence in repositories.
+- Numbered pagination is fine over SQL. Do not force a cursor model onto it because another service in the
+  estate uses one.
 
-**When using object storage.** Remove business rows first only when owed cleanup
-is recorded durably and atomically. For expired uploads/exports, delete objects
-before removing tracking rows and retain failures for retry. Handle partial batch
-failures, use persisted keys, and recheck pending-upload eligibility before storage
+**When using object storage.** Remove business rows first only when owed cleanup is recorded durably and
+atomically. For expired uploads/exports, delete objects before removing tracking rows and retain failures for
+retry. Handle partial batch failures, use persisted keys, and recheck pending-upload eligibility before storage
 work. Database removal and lifecycle policies do not prove object deletion.
 
 ## Runtime layout
 
 - Use named models/interfaces for object return types, including Promise results.
-- Await into descriptive local variables before returning or constructing responses.
-  Keep awaits inside their existing try/catch blocks to preserve rejection handling.
-- In controllers, services, and repositories, order public operations Create → Read
-  → Update → Delete when present; keep constructors first and helpers afterward.
+- Await into descriptive local variables before returning or constructing responses. Keep awaits inside their
+  existing try/catch blocks to preserve rejection handling.
+- In controllers, services, and repositories, order public operations Create → Read → Update → Delete when
+  present; keep constructors first and helpers afterward.
 
 ## Prefer boring code
 
@@ -258,21 +238,20 @@ Mock at external boundaries and deliberate architectural seams, nowhere else.
 For this stack specifically:
 
 - Stub AWS SDK boundaries through existing seams rather than module interception.
-- For SQL integration tests, use disposable databases with committed migrations
-  and baseline fixtures. Mocked queries or another engine do not verify
-  engine-specific constraints and transactions.
-- Test middleware behavior directly against a constructed request object. Handler tests
-  verify composed behavior through observable responses, not internal call counts.
-- **Write template assertions for `lib/`.** Synthesize the stack and assert the resources
-  it produces: permissions granted, environment variables set, authorizer attached. Stacks
-  are code, and an unasserted stack is untested infrastructure.
+- For SQL integration tests, use disposable databases with committed migrations and baseline fixtures. Mocked
+  queries or another engine do not verify engine-specific constraints and transactions.
+- Test middleware behavior directly against a constructed request object. Handler tests verify composed behavior
+  through observable responses, not internal call counts.
+- **Write template assertions for `lib/`.** Synthesize the stack and assert the resources it produces:
+  permissions granted, environment variables set, authorizer attached. Stacks are code, and an unasserted stack
+  is untested infrastructure.
 
-- Template tests may disable bundling; separately verify real runtime bundles for
-  entrypoints, accidental CDK inclusion, and size regressions.
-- Local claim fixtures and synthesis do not verify deployed authorization. Report
-  live authorization evidence separately.
-- Test that composed validation passes coerced/defaulted/stripped values downstream
-  and that parser and authorization failures retain their status and CORS headers.
+- Template tests may disable bundling; separately verify real runtime bundles for entrypoints, accidental CDK
+  inclusion, and size regressions.
+- Local claim fixtures and synthesis do not verify deployed authorization. Report live authorization evidence
+  separately.
+- Test that composed validation passes coerced/defaulted/stripped values downstream and that parser and
+  authorization failures retain their status and CORS headers.
 
 ## Test isolation
 
@@ -299,8 +278,8 @@ Run the project's checks before reporting a change complete. Never describe work
 - If a check cannot run in this environment, name it and say so plainly. Do not imply it passed.
 - Report the outcome, not the intent: name the commands you ran and what they returned.
 
-For an infrastructure change, `cdk diff` is part of verification. Read the diff and report
-what it would change. A diff showing a resource replacement is a finding, not a detail.
+For an infrastructure change, `cdk diff` is part of verification. Read the diff and report what it would change.
+A diff showing a resource replacement is a finding, not a detail.
 
 ## Version control
 
@@ -334,9 +313,9 @@ or writes against live data.
 - Ask when target, risk, or scope materially expands. Ambiguous permission is not
   approval. Follow higher-priority per-action confirmation requirements.
 
-Production datastores carry deletion protection and a retain policy. **Never lower either
-to make a deploy succeed** — a deploy that requires it is a deploy that would destroy
-data. Stop and report what the diff shows instead.
+Production datastores carry deletion protection and a retain policy. **Never lower either to make a deploy
+succeed** — a deploy that requires it is a deploy that would destroy data. Stop and report what the diff shows
+instead.
 
 - Never read `.env` files, credential stores, key material, or CI secrets unless the task cannot be done otherwise and the user has asked for it.
 - Never print a secret's value — not in output, not in logs, not in a comment, not in an error message. Refer to it by name.
@@ -354,8 +333,64 @@ data. Stop and report what the diff shows instead.
   execution evidence in the existing plan or tracking mechanism.
 - Distinguish implemented behavior from deployment readiness that remains unverified.
 
+## README Consistency Standard
+
+Give readers a concise, familiar entry point. Standardize organization, not content,
+tooling, or architecture; preserve useful repository-specific information.
+
+### Recommended section order
+
+Use these names and this order where applicable; omit irrelevant sections.
+
+1. **Purpose** — Briefly explain what the repository does, who uses it, and its
+   responsibility within the broader application.
+2. **Architecture / Repository Overview** — Describe major components and connections;
+   for docs repositories, describe organization and sources of truth. Include a small
+   diagram only when it clarifies a relationship; accuracy matters more than format.
+3. **Prerequisites and Configuration** — Identify tools, external resources, and required
+   values before commands that need them. Separate local and deployment requirements;
+   explain value sources, generated values, and public exposure. Never include secrets.
+4. **Local Setup and Usage** — Give complete, ordered steps using actual package scripts,
+   including tests/checks. For docs repositories, explain navigation, editing, preview,
+   and validation instead of inventing application workflows.
+5. **Deployment / Publishing** — Where applicable, separate Development and Production,
+   first-time preparation and routine releases. Explain triggers, configuration,
+   migration ordering, and publishing risks; link detailed runbooks.
+6. **Teardown / Cleanup** — Show supported commands and exact targets where applicable.
+   State what is deleted, retained, imported, or needs separate cleanup. Never imply
+   stack destruction removes every related resource.
+7. **Operational Notes and Limitations** — Include troubleshooting, compatibility, and
+   deferred capabilities. Distinguish implemented behavior, known limitations, and
+   checks or deployment behavior not yet verified.
+8. **References** — Link useful specs, testing guides, contracts, and runbooks. Reuse
+   existing indexes rather than adding exhaustive document catalogs.
+
+### Content and editing rules
+
+- Review the existing README and current source before reorganizing. Preserve important
+  information; remove only duplication, obsolete guidance, or inaccuracies. When moving
+  detail to a runbook, retain a short explanation and a working README link.
+- Preserve API endpoints, authentication, configuration, database deployment,
+  workers/retries, test prerequisites, and migration safety when applicable.
+- Preserve UI routes, authentication/loading, environment variables, build labels,
+  API connection requirements, and deployment details when applicable.
+- Preserve docs requirements, prototypes, company standards, ownership, navigation,
+  editing, and validation conventions. Put route/endpoint references near the overview
+  or in a clearly named section nearby; do not force awkward placement.
+- Keep commands copyable, correctly scoped, and consistent with scripts and pipelines.
+  Do not impose another repository's framework, runner, environments, or architecture.
+- Avoid completed-cycle handoffs, repeated spec narratives, and speculative features
+  presented as current behavior. README refresh work does not authorize runtime code,
+  infrastructure, dependency, or deployment changes.
+
+### Verification
+
+Verify commands, routes, configuration, links, and operational claims against current
+source. Run applicable Markdown formatting and whitespace checks. Report unverified
+statements plainly; local tests alone do not establish production readiness.
+
 ## Reporting
 
-Report outcomes faithfully. If tests fail, say so and show the output. If you skipped a
-step, say which. If something is done and verified, say so plainly without hedging. Never
-describe work as complete when part of it is unfinished — say what is left and why.
+Report outcomes faithfully. If tests fail, say so and show the output. If you skipped a step, say which. If
+something is done and verified, say so plainly without hedging. Never describe work as complete when part of it
+is unfinished — say what is left and why.

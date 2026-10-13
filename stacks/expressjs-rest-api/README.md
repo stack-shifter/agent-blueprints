@@ -58,7 +58,7 @@ Four places, all deliberate:
 
 ## Snippet subset
 
-Carries twelve of the fourteen snippets. Omits `accessibility/wcag-aa-baseline` (no user
+Carries thirteen snippets, including README consistency. Omits `accessibility/wcag-aa-baseline` (no user
 interface) and `typing/python-type-hints` (wrong language).
 
 ## Status

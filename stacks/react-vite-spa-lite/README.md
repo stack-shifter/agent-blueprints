@@ -26,11 +26,13 @@ file's text; it is not an overlay to paste on top of this one.
 
 ## Snippet subset
 
-Carries sixteen snippets, including test isolation, deferred work, and spec/plan
+Carries seventeen snippets, including test isolation, deferred work, and spec/plan
 scope. Uses `accessibility/project-requirements` and `safety/scoped-authorization`
 in place of unconditional WCAG conformance and repeated approval for ordinary edits.
 Omits Python typing because this is a TypeScript stack. Shared wording is pasted
 in full; the baseline has no dependency on these vault paths.
+
+All stacks carry the canonical README consistency standard in full.
 
 ## Status
 
