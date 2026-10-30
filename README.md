@@ -63,6 +63,7 @@ paste that snippet into its agent file. Always paste the text — never a path.
 | [`aws-cdk-library`](stacks/aws-cdk-library/) | Working **on** a shared AWS CDK construct library that other repos build stacks with | **Complete** |
 | [`aws-cdk-serverless-api`](stacks/aws-cdk-serverless-api/) | Building a production serverless API — API Gateway and Lambda, over DynamoDB or SQL — using existing constructs | **Complete** |
 | [`expressjs-rest-api`](stacks/expressjs-rest-api/) | A containerized Express 5 REST API — versioned routers, thin controllers, Zod validation, Drizzle repositories | **Complete** |
+| [`html-vite`](stacks/html-vite/) | A plain HTML site or browser interface — CSS, vanilla JavaScript modules, and Vite | **Complete** |
 | [`react-vite-spa-lite`](stacks/react-vite-spa-lite/) | A React SPA where auth, styling, forms and data fetching are the project's own call | **Complete** |
 | [`react-vite-spa-full`](stacks/react-vite-spa-full/) | A React SPA on the house set — Cognito hosted UI, Bootstrap 5, React Hook Form + Zod | **Complete** |
 | [`angular-spa`](stacks/angular-spa/) | An Angular SPA — standalone components, signals, reactive forms, lazy routes | **Complete** |
