@@ -165,12 +165,24 @@ When several implementations work, choose the one a mid-level developer understa
 Write code that reads top to bottom like prose. Density is not concision.
 
 - One statement per line. Never chain unrelated operations onto one line to save space.
-- Separate logical stanzas with a single blank line. Group a variable's declaration with the lines that first use it.
+- Keep closely related statements together, including a variable's declaration
+  and its first use. Use one blank line between distinct steps, even when
+  neither needs a comment.
 - Declare variables close to first use, not in a block at the top of the function.
 - Put the early returns and guard clauses first, then the main path. Never wrap the main path in an `else`.
 - Order functions so a caller appears above the functions it calls, so the file reads at descending levels of detail.
-- Break a long expression across lines at the operators, aligning the operands — do not let it wrap arbitrarily at the margin.
+- Where the formatter leaves wrapping to you, break long expressions at
+  operators and align the operands.
 - Keep functions short enough to see whole. If you cannot see the top and bottom at once, extract a named helper.
+
+For JavaScript and TypeScript, apply these additional rules.
+
+- Put JSDoc immediately above its declaration. Use one blank line before the
+  block when it follows imports or another declaration.
+- Put an inline comment immediately above the statements it explains. Use one
+  blank line before the comment when it starts a new logical step.
+- Skip blank lines immediately after opening braces or before closing braces.
+- Follow the repository's formatter for indentation and wrapping.
 
 ## Naming
 
@@ -184,26 +196,47 @@ Write code that reads top to bottom like prose. Density is not concision.
 
 ## Comments
 
-Write comments that help a human follow the code: purpose, contracts, assumptions,
-meaningful workflow stages, and rationale. Do not optimize for fewer comments.
+Write comments that explain purpose, contracts, assumptions, meaningful workflow
+steps, and rationale. Include the HTTP method and route in doc comments for
+handlers or controllers where applicable.
 
-- Use concise doc comments to explain a function's purpose and contract. Include
-  the HTTP method and route for handlers or controllers where applicable.
-- Use short inline comments to introduce meaningful logical steps, such as
-  relying on validated input, delegating to a service, or protecting public error
-  responses. Keep them even when a reader could infer the behavior from the code.
-- Explain workarounds, non-obvious constraints, ordering requirements, and
-  deliberate deviations from the normal pattern.
-- Remove mechanical narration that adds no reading benefit, not useful summaries
-  or workflow signposts. Correct inaccurate or stale comments when behavior changes.
+- Use short inline comments (`//` in JavaScript and TypeScript) above
+  meaningful workflow steps. Explain intent, ordering, constraints,
+  workarounds, or other non-obvious behavior when it helps the reader.
+- Skip comments that paraphrase obvious statements or repeat the documentation
+  comment. Keep useful workflow signposts and update them when behavior changes.
 - Never leave commented-out code. Version control already remembers it.
 - No changelog comments, no attribution comments, no `// TODO` without a concrete
   next action or removal condition.
 - Follow explicit project or user documentation preferences; otherwise match the
   closest existing peer in the same layer. Keep coverage uniform within a peer group.
-- Document exported contracts: purpose, relevant inputs and outputs, assumptions,
-  and meaningful errors. Use the language's documentation style without forcing
-  redundant tags or narrating every statement.
+
+For JavaScript and TypeScript, use these JSDoc conventions.
+
+- Write every JSDoc block across multiple lines, even for a single sentence. Put
+  `/**` and `*/` on their own lines and prefix each content line with ` *`.
+- Use JSDoc to describe the purpose and contract of exported declarations.
+  Document meaningful inputs, outputs, errors, side effects, or assumptions
+  where relevant. Use tags when they add information or the project requires them.
+
+For other languages, use concise doc comments in the language's documentation
+style to describe functions and exported contracts. Include relevant inputs,
+outputs, assumptions, and meaningful errors.
+
+JavaScript example using an ES module export
+
+```js
+/**
+ * Saves a record after confirming the destination is writable.
+ */
+export async function saveRecord(destination, record) {
+  // Check access before serializing a record we may be unable to save.
+  await destination.assertWritable();
+
+  const contents = JSON.stringify(record);
+  await destination.write(contents);
+}
+```
 
 ## Deferred work
 
